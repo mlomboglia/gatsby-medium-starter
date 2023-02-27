@@ -1,28 +1,33 @@
 import React from "react"
 import { useStaticQuery, graphql } from "gatsby"
 
-const MediumRssFeed = () => {
+const MediumPlugin = () => {
   const data = useStaticQuery(graphql`
     {
-      allFeedMediumBlog {
+      allMediumPost(sort: { createdAt: DESC }) {
         edges {
           node {
+            id
+            uniqueSlug
             title
-            link
-            content
+            createdAt(formatString: "MMM YYYY")
+            virtuals {
+              subtitle
+              readingTime
+              previewImage {
+                imageId
+              }
+            }
+            author {
+              username
+            }
           }
         }
-      }
-    
-      feedMediumBlog {
-        title
-        link
-        content
       }
     }
   `)
 
-  const posts = data.allFeedMediumBlog.edges
+  const posts = data.allMediumPost.edges
 
   if (posts.length === 0) {
     return (
@@ -36,13 +41,14 @@ const MediumRssFeed = () => {
 
   return (
     <div>
-      <h1>Option 2</h1>
+      <h1>Option 1</h1>
       <ol style={{ listStyle: `none` }}>
         {posts.map(post => {
           const title = post.node.title
-          
+          const subtitle = post.node.virtuals.subtitle
+
           return (
-            <li>
+            <li key={post.node.id}>
               <article
                 className="post-list-item"
                 itemScope
@@ -51,14 +57,20 @@ const MediumRssFeed = () => {
                 <header>
                   <a
                     key={post.node.id}
-                    href={post.node.link}
+                    href={`https://medium.com/@mlombog/${post.node.uniqueSlug}`}
                   >
+                    <img
+                      alt="blog"
+                      src={`https://miro.medium.com/max/500/${post.node.virtuals.previewImage.imageId}`}
+                    />
                   </a>
                   <a
-                    href={post.node.link}
+                    href={`https://medium.com/@mlombog/${post.node.uniqueSlug}`}
                   >
                     <h2>{title}</h2>
+                    <h5>{subtitle}</h5>
                   </a>
+                  <small>{post.node.createdAt}</small>
                 </header>
               </article>
             </li>
@@ -69,4 +81,4 @@ const MediumRssFeed = () => {
   )
 }
 
-export default MediumRssFeed
+export default MediumPlugin
